@@ -1,6 +1,10 @@
-﻿namespace Ecommerce.OrderService.Models
+﻿namespace Ecommerce.OrderService.Models;
+
+public enum OrderStatus
 {
-    public class OrderStatus
-    {
-    }
+    Pending,     
+    Paid,       
+    Failed,      
+    Completed,  
+    Cancelled   
 }
