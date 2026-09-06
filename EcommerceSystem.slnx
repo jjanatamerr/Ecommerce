@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Ecommerce.ApiGateway/Ecommerce.ApiGateway.csproj" />
+  <Project Path="Ecommerce.CartService/Ecommerce.CartService.csproj" />
+  <Project Path="Ecommerce.OrderService/Ecommerce.OrderService.csproj" />
+  <Project Path="Ecommerce.ProductService/Ecommerce.ProductService.csproj" />
+  <Project Path="Ecommerce.UserService/Ecommerce.UserService.csproj" />
+</Solution>
