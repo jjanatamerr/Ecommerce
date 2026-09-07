@@ -1,6 +1,4 @@
 ﻿namespace Ecommerce.CartService.DTOs.Requests
 {
-    public class AddToCartRequest
-    {
-    }
+    public record AddCartItemRequest(Guid ProductId, int Quantity);
 }

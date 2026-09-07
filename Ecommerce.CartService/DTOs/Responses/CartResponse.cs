@@ -1,6 +1,5 @@
 ﻿namespace Ecommerce.CartService.DTOs.Responses
 {
-    public class CartResponse
-    {
-    }
+    public record CartDto(Guid Id, Guid UserId, List<CartItemDto> Items, decimal Total, DateTime CreatedAt);
+
 }
