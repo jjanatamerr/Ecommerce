@@ -16,21 +16,33 @@ public class OrderDbContext : DbContext
         modelBuilder.Entity<Order>(entity =>
         {
             entity.HasKey(o => o.Id);
-            entity.Property(o => o.Status).HasConversion<string>().HasMaxLength(20);
-            entity.Property(o => o.TotalAmount).HasColumnType("decimal(18,2)");
-            entity.HasIndex(o => o.IdempotencyKey).IsUnique();
-
+            entity.Property(o => o.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+            entity.Property(o => o.TotalAmount)
+                .HasColumnType("decimal(18,2)");
+            entity.Property(o => o.IdempotencyKey)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.HasIndex(o => o.IdempotencyKey)
+                .IsUnique();
             entity.HasMany(o => o.Items)
-                  .WithOne(i => i.Order)
-                  .HasForeignKey(i => i.OrderId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                .WithOne(i => i.Order)
+                .HasForeignKey(i => i.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
             entity.HasKey(i => i.Id);
-            entity.Property(i => i.UnitPriceSnapshot).HasColumnType("decimal(18,2)");
-            entity.Ignore(i => i.LineTotal); 
+            entity.Property(i => i.ProductName)
+                .IsRequired()
+                .HasMaxLength(300);
+            entity.Property(i => i.UnitPriceSnapshot)
+                .HasColumnType("decimal(18,2)");
+            entity.Property(i => i.Quantity)
+                .IsRequired();
+            entity.Ignore(i => i.LineTotal);
         });
     }
 }
