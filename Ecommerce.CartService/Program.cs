@@ -1,3 +1,6 @@
+using Ecommerce.CartService.Services;
+using Ecommerce.CartService.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +18,18 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+builder.Services.AddHttpClient<IUserServiceClient, UserServiceClient>(client =>
+{
+    client.BaseAddress = new Uri("https://user-service.internal/");
+});
+
+builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>(client =>
+{
+    client.BaseAddress = new Uri("https://product-service.internal/");
+});
+
+builder.Services.AddScoped<ICartService, CartService>();
 
 app.UseAuthorization();
 
