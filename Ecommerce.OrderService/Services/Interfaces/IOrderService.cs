@@ -5,9 +5,9 @@ namespace Ecommerce.OrderService.Services.Interfaces;
 
 public interface IOrderService
 {
-    Task<OrderResponse> CheckoutAsync(Guid userId,CheckoutRequest request);
+    Task<OrderResponse> CheckoutAsync( Guid userId,CheckoutRequest request);
 
-    Task<OrderResponse?> GetOrderByIdAsync(Guid userId, Guid orderId);
+    Task<OrderResponse?> GetOrderByIdAsync(Guid userId,Guid orderId);
 
     Task<List<OrderResponse>> GetMyOrdersAsync(Guid userId);
 }

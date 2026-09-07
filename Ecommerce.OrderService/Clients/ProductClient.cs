@@ -14,11 +14,23 @@ public class ProductClient : IProductClient
 
     public async Task<ProductInfo?> GetProductAsync(Guid productId)
     {
-        var response = await _httpClient.GetAsync($"/api/v1/products/{productId}");
+        var response = await _httpClient.GetAsync($"/api/products/{productId}");
 
         if (!response.IsSuccessStatusCode)
+        {
             return null;
+        }
 
         return await response.Content.ReadFromJsonAsync<ProductInfo>();
+    }
+    public async Task<bool> DeductStockAsync(List<DeductStockItemDto> items)
+    {
+        var response = await _httpClient.PostAsJsonAsync("/api/products/deduct-stock", new { Items = items });
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task RestoreStockAsync(List<DeductStockItemDto> items)
+    {
+        await _httpClient.PostAsJsonAsync("/api/products/restore-stock", new { Items = items });
     }
 }

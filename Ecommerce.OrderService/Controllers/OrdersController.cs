@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿
+using System.Security.Claims;
 using Ecommerce.OrderService.DTOs.Requests;
 using Ecommerce.OrderService.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -18,11 +19,24 @@ public class OrdersController : ControllerBase
         _orderService = orderService;
     }
 
+    // Gets the UserId from the authenticated JWT.
+    private Guid? GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (claim == null)
+        {
+            return null;
+        }
+
+        return Guid.TryParse(claim.Value, out var userId) ? userId: null;
+    }
+
     [HttpPost("checkout")]
     public async Task<IActionResult> Checkout(
         [FromBody] CheckoutRequest request)
     {
-        var userId = GetCurrentUserId();
+        var userId = GetUserId();
 
         if (userId == null)
         {
@@ -34,7 +48,7 @@ public class OrdersController : ControllerBase
 
         try
         {
-            var result = await _orderService.CheckoutAsync( userId.Value,request);
+            var result = await _orderService.CheckoutAsync(userId.Value,request);
 
             return Ok(result);
         }
@@ -54,10 +68,11 @@ public class OrdersController : ControllerBase
         }
     }
 
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetOrder(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = GetUserId();
 
         if (userId == null)
         {
@@ -67,7 +82,7 @@ public class OrdersController : ControllerBase
             });
         }
 
-        var order = await _orderService.GetOrderByIdAsync( userId.Value,id);
+        var order = await _orderService.GetOrderByIdAsync(userId.Value,id);
 
         if (order == null)
         {
@@ -84,7 +99,7 @@ public class OrdersController : ControllerBase
     [HttpGet("my-orders")]
     public async Task<IActionResult> GetMyOrders()
     {
-        var userId = GetCurrentUserId();
+        var userId = GetUserId();
 
         if (userId == null)
         {
@@ -97,18 +112,5 @@ public class OrdersController : ControllerBase
         var orders = await _orderService.GetMyOrdersAsync(userId.Value);
 
         return Ok(orders);
-    }
-
-
-    private Guid? GetCurrentUserId()
-    {
-        var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst(ClaimTypes.NameIdentifier);
-
-        if (claim == null)
-        {
-            return null;
-        }
-
-        return Guid.TryParse(claim.Value, out var userId) ? userId: null;
     }
 }

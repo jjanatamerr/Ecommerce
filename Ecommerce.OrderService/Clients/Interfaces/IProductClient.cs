@@ -11,4 +11,6 @@ public class ProductInfo
 public interface IProductClient
 {
     Task<ProductInfo?> GetProductAsync(Guid productId);
+    Task<bool> DeductStockAsync(List<DeductStockItemDto> items);
+    Task RestoreStockAsync(List<DeductStockItemDto> items);
 }

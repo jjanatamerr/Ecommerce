@@ -17,46 +17,68 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
 {
-    options.UseSqlServer( builder.Configuration.GetConnectionString( "DefaultConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 
-builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped< IOrderService, OrderService>();
 
 
-var productServiceUrl = builder.Configuration["Services:ProductServiceUrl"];
+var productServiceUrl =builder.Configuration["Services:ProductServiceUrl"];
 
-builder.Services.AddHttpClient<IProductClient, ProductClient>(
+if (string.IsNullOrWhiteSpace(productServiceUrl))
+{
+    throw new InvalidOperationException("ProductServiceUrl is missing from configuration.");
+}
+
+builder.Services.AddHttpClient<
+    IProductClient,
+    ProductClient>(
     client =>
     {
-        client.BaseAddress = new Uri(productServiceUrl!);
+        client.BaseAddress = new Uri(productServiceUrl);
     });
 
 
-var jwtSection = builder.Configuration.GetSection("Jwt");
 
-var jwtKey = jwtSection["Key"];
+var jwtSection =
+    builder.Configuration.GetSection("Jwt");
+
+var jwtKey =
+    jwtSection["Key"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException( "JWT Key is missing from configuration.");
+    throw new InvalidOperationException("JWT Key is missing from configuration.");
 }
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+builder.Services
+    .AddAuthentication(
+        JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
         options.TokenValidationParameters =
             new TokenValidationParameters
             {
                 ValidateIssuer = true,
+
                 ValidateAudience = true,
+
                 ValidateLifetime = true,
+
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSection["Issuer"],
-                ValidAudience =jwtSection["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+
+                ValidIssuer =jwtSection["Issuer"],
+
+                ValidAudience = jwtSection["Audience"],
+
+                IssuerSigningKey = new SymmetricSecurityKey( Encoding.UTF8.GetBytes(jwtKey)),
+
                 ClockSkew = TimeSpan.Zero
             };
     });
+
 
 builder.Services.AddAuthorization();
 

@@ -21,21 +21,21 @@ public class OrderService : IOrderService
         _logger = logger;
     }
 
-    public async Task<OrderResponse> CheckoutAsync( Guid userId,CheckoutRequest request)
+    public async Task<OrderResponse> CheckoutAsync(Guid userId,CheckoutRequest request)
     {
 
 
-        var existingOrder = await _db.Orders.Include(o => o.Items) .FirstOrDefaultAsync(o => o.IdempotencyKey == request.IdempotencyKey);
+        var existingOrder = await _db.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.IdempotencyKey == request.IdempotencyKey);
 
         if (existingOrder != null)
         {
-
+            
             if (existingOrder.UserId != userId)
             {
                 throw new InvalidOperationException("This idempotency key has already been used.");
             }
 
-            _logger.LogInformation("Idempotent checkout request detected. " +"Returning existing order {OrderId} for user {UserId}.",existingOrder.Id, userId);
+            _logger.LogInformation("Idempotent checkout request detected. " +"Returning existing order {OrderId} for user {UserId}.", existingOrder.Id, userId);
 
             return MapToResponse(existingOrder);
         }
@@ -45,6 +45,7 @@ public class OrderService : IOrderService
 
         foreach (var item in request.Items)
         {
+
             var product = await _productClient.GetProductAsync(item.ProductId);
 
             if (product == null)
@@ -60,29 +61,38 @@ public class OrderService : IOrderService
             var orderItem = new OrderItem
             {
                 Id = Guid.NewGuid(),
+
                 ProductId = product.Id,
                 ProductName = product.Name,
+
                 UnitPriceSnapshot = product.Price,
+
                 Quantity = item.Quantity
             };
 
             orderItems.Add(orderItem);
         }
 
+
         var order = new Order
         {
             Id = Guid.NewGuid(),
+
             UserId = userId,
+
             IdempotencyKey = request.IdempotencyKey,
+
             Status = OrderStatus.Pending,
+
             CreatedAt = DateTime.UtcNow,
+
             Items = orderItems
         };
 
-        order.TotalAmount = orderItems.Sum(
-            item => item.UnitPriceSnapshot * item.Quantity);
+        order.TotalAmount = orderItems.Sum(item => item.UnitPriceSnapshot * item.Quantity);
 
         _db.Orders.Add(order);
+
 
         try
         {
@@ -93,11 +103,7 @@ public class OrderService : IOrderService
 
             _logger.LogWarning("Possible idempotency race condition detected " +"for key {IdempotencyKey}.", request.IdempotencyKey);
 
-            var raceOrder = await _db.Orders
-                .AsNoTracking()
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o =>
-                    o.IdempotencyKey == request.IdempotencyKey);
+            var raceOrder = await _db.Orders.AsNoTracking().Include(o => o.Items).FirstOrDefaultAsync(o => o.IdempotencyKey == request.IdempotencyKey);
 
             if (raceOrder != null)
             {
@@ -114,15 +120,14 @@ public class OrderService : IOrderService
         }
 
 
-        var paymentSucceeded = SimulatePayment(order.TotalAmount);
-
+        var paymentSucceeded =SimulatePayment(order.TotalAmount);
 
         if (paymentSucceeded)
         {
             order.Status = OrderStatus.Paid;
             order.UpdatedAt = DateTime.UtcNow;
 
-            _logger.LogInformation( "Payment succeeded for order {OrderId}. " +"Order marked as Paid.", order.Id);
+            _logger.LogInformation("Payment succeeded for order {OrderId}. " +"Order marked as Paid.", order.Id);
         }
         else
         {
@@ -136,10 +141,8 @@ public class OrderService : IOrderService
 
         await _db.SaveChangesAsync();
 
-
         return MapToResponse(order);
     }
-
 
     public async Task<OrderResponse?> GetOrderByIdAsync(
         Guid userId,
@@ -148,9 +151,10 @@ public class OrderService : IOrderService
         var order = await _db.Orders
             .AsNoTracking()
             .Include(o => o.Items)
-            .FirstOrDefaultAsync(o =>
-                o.Id == orderId &&
-                o.UserId == userId);
+            .FirstOrDefaultAsync(
+                o =>
+                    o.Id == orderId &&
+                    o.UserId == userId);
 
         if (order == null)
         {
@@ -160,9 +164,7 @@ public class OrderService : IOrderService
         return MapToResponse(order);
     }
 
-
-    public async Task<List<OrderResponse>> GetMyOrdersAsync(
-        Guid userId)
+    public async Task<List<OrderResponse>> GetMyOrdersAsync(Guid userId)
     {
         var orders = await _db.Orders
             .AsNoTracking()
@@ -176,34 +178,66 @@ public class OrderService : IOrderService
             .ToList();
     }
 
-
     private static bool SimulatePayment(decimal amount)
     {
         return amount > 0;
     }
-
-
 
     private static OrderResponse MapToResponse(Order order)
     {
         return new OrderResponse
         {
             Id = order.Id,
+
             Status = order.Status.ToString(),
+
             TotalAmount = order.TotalAmount,
+
             CreatedAt = order.CreatedAt,
 
             Items = order.Items
                 .Select(item => new OrderItemResponse
                 {
                     ProductId = item.ProductId,
+
                     ProductName = item.ProductName,
+
                     UnitPrice = item.UnitPriceSnapshot,
+
                     Quantity = item.Quantity,
+
                     LineTotal =
-                        item.UnitPriceSnapshot * item.Quantity
+                        item.UnitPriceSnapshot *
+                        item.Quantity
                 })
                 .ToList()
         };
     }
+
+    var stockItems = request.Items.Select(i => new DeductStockItemDto(i.ProductId, i.Quantity)).ToList();
+
+    var stockDeducted = await _productClient.DeductStockAsync(stockItems);
+    if (!stockDeducted)
+        {
+            throw new InvalidOperationException("One or more items are out of stock.");
+        }
+    _db.Orders.Add(order);
+    await _db.SaveChangesAsync();
+    var paymentSucceeded = SimulatePayment(order.TotalAmount);
+
+    if (paymentSucceeded)
+    {
+        order.Status = OrderStatus.Paid;
+        order.UpdatedAt = DateTime.UtcNow;
+    }
+    else
+    {
+        order.Status = OrderStatus.Failed;
+        order.UpdatedAt = DateTime.UtcNow;
+        await _productClient.RestoreStockAsync(stockItems);
+    }
+
+    await _db.SaveChangesAsync();
+    return MapToResponse(order);
+
 }
