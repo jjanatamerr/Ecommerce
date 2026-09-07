@@ -1,40 +1,14 @@
 ﻿using Ecommerce.CartService.DTOs;
+using Ecommerce.CartService.DTOs.Responses;
 
 namespace Ecommerce.CartService.Services.Interfaces
 {
-    public interface IUserServiceClient
+    public interface ICartService
     {
-        Task<UserDto?> GetUserAsync(Guid userId);
-    }
-
-    public class UserServiceClient : IUserServiceClient
-    {
-        private readonly HttpClient _httpClient;
-        public UserServiceClient(HttpClient httpClient) => _httpClient = httpClient;
-
-        public async Task<UserDto?> GetUserAsync(Guid userId)
-        {
-            var response = await _httpClient.GetAsync($"/api/users/{userId}");
-            if (!response.IsSuccessStatusCode) return null;
-            return await response.Content.ReadFromJsonAsync<UserDto>();
-        }
-    }
-
-    public interface IProductServiceClient
-    {
-        Task<ProductDto?> GetProductAsync(Guid productId);
-    }
-
-    public class ProductServiceClient : IProductServiceClient
-    {
-        private readonly HttpClient _httpClient;
-        public ProductServiceClient(HttpClient httpClient) => _httpClient = httpClient;
-
-        public async Task<ProductDto?> GetProductAsync(Guid productId)
-        {
-            var response = await _httpClient.GetAsync($"/api/products/{productId}");
-            if (!response.IsSuccessStatusCode) return null;
-            return await response.Content.ReadFromJsonAsync<ProductDto>();
-        }
+        Task<CartDto> GetOrCreateCartAsync(Guid userId);
+        Task<CartDto> AddItemAsync(Guid userId, Guid productId, int quantity);
+        Task<CartDto> UpdateItemQuantityAsync(Guid userId, Guid cartItemId, int quantity);
+        Task<CartDto> RemoveItemAsync(Guid userId, Guid cartItemId);
+        Task ClearCartAsync(Guid userId);
     }
 }

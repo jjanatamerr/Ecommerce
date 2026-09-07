@@ -19,14 +19,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-builder.Services.AddHttpClient<IUserServiceClient, UserServiceClient>(client =>
-{
-    client.BaseAddress = new Uri("https://user-service.internal/");
-});
 
 builder.Services.AddHttpClient<IProductServiceClient, ProductServiceClient>(client =>
 {
     client.BaseAddress = new Uri("https://product-service.internal/");
+    // or for local dev, something like:
+    // client.BaseAddress = new Uri("https://localhost:5003/");
 });
 
 builder.Services.AddScoped<ICartService, CartService>();
