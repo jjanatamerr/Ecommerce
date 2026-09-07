@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace Ecommerce.CartService.Controllers
 {
     [ApiController]
-    [Route("api/cart")]
+    [Route("api/v1/cart")]
     [Authorize] // requires a valid JWT on every endpoint
     public class CartController : ControllerBase
     {

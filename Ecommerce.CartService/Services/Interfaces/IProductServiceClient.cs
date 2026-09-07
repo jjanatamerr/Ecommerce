@@ -1,4 +1,6 @@
-﻿namespace Ecommerce.CartService.Services.Interfaces
+﻿using Ecommerce.CartService.DTOs;
+
+namespace Ecommerce.CartService.Services.Interfaces
 {
     public interface IProductServiceClient
     {

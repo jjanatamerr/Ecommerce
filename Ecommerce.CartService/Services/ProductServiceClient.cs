@@ -11,7 +11,7 @@ namespace Ecommerce.CartService.Services
 
         public async Task<ProductDto?> GetProductAsync(Guid productId)
         {
-            var response = await _httpClient.GetAsync($"/api/products/{productId}");
+            var response = await _httpClient.GetAsync($"/api/v1/products/{productId}");
 
             if (!response.IsSuccessStatusCode)
                 return null;

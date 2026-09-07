@@ -1,6 +1,7 @@
 ﻿using Ecommerce.ProductService.DTOs.Requests;
 using Ecommerce.ProductService.DTOs.Responses;
 
+
 namespace Ecommerce.ProductService.Services.Interfaces;
 
 public interface IProductService

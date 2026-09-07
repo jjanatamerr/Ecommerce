@@ -1,19 +1,9 @@
 ﻿using Ecommerce.CartService.DTOs.Responses;
 using Ecommerce.CartService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata;
 
 namespace Ecommerce.CartService.Services
 {
-    public interface ICartService
-    {
-        Task<CartDto> GetOrCreateCartAsync(Guid userId);
-        Task<CartDto> AddItemAsync(Guid userId, Guid productId, int quantity);
-        Task<CartDto> UpdateItemQuantityAsync(Guid userId, Guid cartItemId, int quantity);
-        Task<CartDto> RemoveItemAsync(Guid userId, Guid cartItemId);
-        Task ClearCartAsync(Guid userId);
-    }
-
     public class CartService : ICartService
     {
         private readonly CartDbContext _db;
@@ -25,7 +15,6 @@ namespace Ecommerce.CartService.Services
             _productServiceClient = productServiceClient;
         }
 
-        // No more User service validation — userId is trusted because it came from the JWT
         private async Task<Cart> GetOrCreateCartEntityAsync(Guid userId)
         {
             var cart = await _db.Carts
@@ -59,7 +48,6 @@ namespace Ecommerce.CartService.Services
         {
             var cart = await GetOrCreateCartEntityAsync(userId);
 
-            // Still fetch price/name server-side — never trust these from the client
             var product = await _productServiceClient.GetProductAsync(productId);
             if (product is null)
                 throw new InvalidOperationException($"Product {productId} does not exist");
@@ -80,7 +68,7 @@ namespace Ecommerce.CartService.Services
                     CartId = cart.Id,
                     ProductId = product.Id,
                     ProductName = product.Name,
-                    UnitPrice = product.Price,   // server-side, trustworthy
+                    UnitPrice = product.Price,
                     Quantity = quantity
                 });
             }
