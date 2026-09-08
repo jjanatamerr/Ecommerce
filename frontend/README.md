@@ -1,75 +1,44 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+1. New Pages
 
-Currently, two official plugins are available:
+Products Page 
+Product Details Page (/products/:id)
+Cart Page 
+Checkout Page 
+Register Page 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## React Compiler
+2. Reusable Components
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+CartItem 
+loading circle
+search bar 
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+3. Services & State Management
+Services Layer: Added productService.ts, cartService.ts, and orderService.ts to handle all API communications via Axios, keeping components clean.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+CartContext: Introduced global state management for the cart.
+It automatically fetches the user's cart on login and exposes methods (addToCart, updateQuantity, removeFromCart, clearCart) to any component in the app.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+4. Next Steps
+- verify the backend API endpoints align with the paths used in the services (/api/products, /api/cart, /api/orders). 
+- hook up the real registration endpoint in Register.tsx.
+- save the image URLs in your database table, and the React frontend will automatically render them inside the ProductCard
 
-```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+extra features-
+- if your .NET backend is not currently running on http://localhost:5100, you will see a polite "Product not found" message or an empty grid, rather than a crash.
+- updated productService.ts to include a beautiful set of mock products (Premium Headphones, Smart Watch, Running Shoes, etc.) as a fallback.
+now, if the backend is offline, the page will gracefully fall back to displaying these examples instead of being empty!
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+CartContext.tsx
+local cart fallback:
+Tries the backend first; if it fails (offline), automatically switches to an in-memory local cart
+addToCart fetches the product from productService (which itself has mock fallback) and stores it locally
 
-```
+
+Checkout.tsx
+If backend is down, order is simulated locally 
