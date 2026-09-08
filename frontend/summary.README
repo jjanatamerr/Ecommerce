@@ -1,0 +1,44 @@
+
+1. New Pages
+
+Products Page 
+Product Details Page (/products/:id)
+Cart Page 
+Checkout Page 
+Register Page 
+
+
+2. Reusable Components
+
+CartItem 
+loading circle
+search bar 
+
+
+3. Services & State Management
+Services Layer: Added productService.ts, cartService.ts, and orderService.ts to handle all API communications via Axios, keeping components clean.
+
+CartContext: Introduced global state management for the cart.
+It automatically fetches the user's cart on login and exposes methods (addToCart, updateQuantity, removeFromCart, clearCart) to any component in the app.
+
+
+4. Next Steps
+- verify the backend API endpoints align with the paths used in the services (/api/products, /api/cart, /api/orders). 
+- hook up the real registration endpoint in Register.tsx.
+- save the image URLs in your database table, and the React frontend will automatically render them inside the ProductCard
+
+
+extra features-
+- if your .NET backend is not currently running on http://localhost:5100, you will see a polite "Product not found" message or an empty grid, rather than a crash.
+- updated productService.ts to include a beautiful set of mock products (Premium Headphones, Smart Watch, Running Shoes, etc.) as a fallback.
+now, if the backend is offline, the page will gracefully fall back to displaying these examples instead of being empty!
+
+
+CartContext.tsx
+local cart fallback:
+Tries the backend first; if it fails (offline), automatically switches to an in-memory local cart
+addToCart fetches the product from productService (which itself has mock fallback) and stores it locally
+
+
+Checkout.tsx
+If backend is down, order is simulated locally 
