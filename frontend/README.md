@@ -2,16 +2,22 @@
 1. New Pages
 
 Products Page 
+
 Product Details Page (/products/:id)
+
 Cart Page 
+
 Checkout Page 
+
 Register Page 
 
 
 2. Reusable Components
 
 CartItem 
+
 loading circle
+
 search bar 
 
 
