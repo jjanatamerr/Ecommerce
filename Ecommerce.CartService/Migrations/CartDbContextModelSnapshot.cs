@@ -21,7 +21,7 @@ namespace Ecommerce.CartService.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Cart", b =>
+            modelBuilder.Entity("Ecommerce.CartService.Models.Cart", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,15 +30,21 @@ namespace Ecommerce.CartService.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
                     b.ToTable("Carts");
                 });
 
-            modelBuilder.Entity("CartItem", b =>
+            modelBuilder.Entity("Ecommerce.CartService.Models.CartItem", b =>
                 {
                     b.Property<Guid>("CartItemId")
                         .ValueGeneratedOnAdd()
@@ -58,6 +64,7 @@ namespace Ecommerce.CartService.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("CartItemId");
@@ -67,9 +74,9 @@ namespace Ecommerce.CartService.Migrations
                     b.ToTable("CartItems");
                 });
 
-            modelBuilder.Entity("CartItem", b =>
+            modelBuilder.Entity("Ecommerce.CartService.Models.CartItem", b =>
                 {
-                    b.HasOne("Cart", "Cart")
+                    b.HasOne("Ecommerce.CartService.Models.Cart", "Cart")
                         .WithMany("Items")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -78,7 +85,7 @@ namespace Ecommerce.CartService.Migrations
                     b.Navigation("Cart");
                 });
 
-            modelBuilder.Entity("Cart", b =>
+            modelBuilder.Entity("Ecommerce.CartService.Models.Cart", b =>
                 {
                     b.Navigation("Items");
                 });

@@ -1,9 +1,12 @@
 ﻿using Ecommerce.CartService.DTOs.Responses;
 using Ecommerce.CartService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Ecommerce.CartService.Models;
+
 
 namespace Ecommerce.CartService.Services
 {
+
     public class CartService : ICartService
     {
         private readonly CartDbContext _db;
@@ -56,13 +59,16 @@ namespace Ecommerce.CartService.Services
                 throw new InvalidOperationException("Not enough stock available");
 
             var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+            CartItem itemToTrack;
+
             if (existingItem is not null)
             {
                 existingItem.Quantity += quantity;
+                _db.Entry(existingItem).State = EntityState.Modified;
             }
             else
             {
-                cart.Items.Add(new CartItem
+                var newItem = new CartItem
                 {
                     CartItemId = Guid.NewGuid(),
                     CartId = cart.Id,
@@ -70,8 +76,12 @@ namespace Ecommerce.CartService.Services
                     ProductName = product.Name,
                     UnitPrice = product.Price,
                     Quantity = quantity
-                });
+                };
+                cart.Items.Add(newItem);
+                _db.CartItems.Add(newItem);   // explicitly tell EF to track this as Added
+                itemToTrack = newItem;
             }
+
 
             await _db.SaveChangesAsync();
             return ToDto(cart);

@@ -25,7 +25,6 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
-
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ProductResponse>> GetById(Guid id)
     {

@@ -1,4 +1,10 @@
-﻿namespace Ecommerce.OrderService.Clients.Interfaces;
+﻿namespace Ecommerce.OrderService.Clients.Interfaces
+{
+    public interface IProductClient
+    {
+        Task<ProductInfo?> GetProductAsync(Guid productId);
+    }
+}
 
 public class ProductInfo
 {
@@ -6,9 +12,4 @@ public class ProductInfo
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int StockQuantity { get; set; }
-}
-
-public interface IProductClient
-{
-    Task<ProductInfo?> GetProductAsync(Guid productId);
 }

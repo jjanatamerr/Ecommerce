@@ -19,18 +19,21 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 {
     options.UseSqlServer( builder.Configuration.GetConnectionString( "DefaultConnection"));
 });
+builder.Services.AddHttpClient<ICartClient, CartClient>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5003/"); // CartService's actual port
+});
 
 
 builder.Services.AddScoped<IOrderService, OrderService>();
 
 
-var productServiceUrl = builder.Configuration["Services:ProductServiceUrl"];
 
-builder.Services.AddHttpClient<IProductClient, ProductClient>(
-    client =>
-    {
-        client.BaseAddress = new Uri(productServiceUrl!);
-    });
+
+builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5002/");
+});
 
 
 var jwtSection = builder.Configuration.GetSection("Jwt");

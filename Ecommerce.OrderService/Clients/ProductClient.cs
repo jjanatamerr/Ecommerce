@@ -14,7 +14,7 @@ public class ProductClient : IProductClient
 
     public async Task<ProductInfo?> GetProductAsync(Guid productId)
     {
-        var response = await _httpClient.GetAsync($"/api/v1/products/{productId}");
+        var response = await _httpClient.GetAsync($"/api/products/{productId}");
 
         if (!response.IsSuccessStatusCode)
             return null;
