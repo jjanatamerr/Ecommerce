@@ -1,18 +1,11 @@
 ﻿using Ecommerce.CartService.DTOs.Responses;
 using Ecommerce.CartService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata;
+using Ecommerce.CartService.Models;
+
 
 namespace Ecommerce.CartService.Services
 {
-    public interface ICartService
-    {
-        Task<CartDto> GetOrCreateCartAsync(Guid userId);
-        Task<CartDto> AddItemAsync(Guid userId, Guid productId, int quantity);
-        Task<CartDto> UpdateItemQuantityAsync(Guid userId, Guid cartItemId, int quantity);
-        Task<CartDto> RemoveItemAsync(Guid userId, Guid cartItemId);
-        Task ClearCartAsync(Guid userId);
-    }
 
     public class CartService : ICartService
     {

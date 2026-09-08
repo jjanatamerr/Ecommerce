@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Ecommerce.ApiGateway\\Ecommerce.ApiGateway.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

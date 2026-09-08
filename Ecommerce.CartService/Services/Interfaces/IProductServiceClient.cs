@@ -1,7 +1,8 @@
-﻿namespace Ecommerce.CartService.Services.Interfaces
+﻿using Ecommerce.CartService.DTOs;
+
+namespace Ecommerce.CartService.Services.Interfaces;
+
+public interface IProductServiceClient
 {
-    public interface IProductServiceClient
-    {
-        Task<ProductDto?> GetProductAsync(Guid productId);
-    }
+    Task<ProductDto?> GetProductAsync(Guid productId);
 }
