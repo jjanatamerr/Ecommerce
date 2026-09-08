@@ -52,7 +52,6 @@ namespace Ecommerce.CartService.Services
         {
             var cart = await GetOrCreateCartEntityAsync(userId);
 
-            // Still fetch price/name server-side — never trust these from the client
             var product = await _productServiceClient.GetProductAsync(productId);
             if (product is null)
                 throw new InvalidOperationException($"Product {productId} does not exist");
@@ -61,22 +60,29 @@ namespace Ecommerce.CartService.Services
                 throw new InvalidOperationException("Not enough stock available");
 
             var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+            CartItem itemToTrack;
+
             if (existingItem is not null)
             {
                 existingItem.Quantity += quantity;
+                _db.Entry(existingItem).State = EntityState.Modified;
             }
             else
             {
-                cart.Items.Add(new CartItem
+                var newItem = new CartItem
                 {
                     CartItemId = Guid.NewGuid(),
                     CartId = cart.Id,
                     ProductId = product.Id,
                     ProductName = product.Name,
-                    UnitPrice = product.Price,   // server-side, trustworthy
+                    UnitPrice = product.Price,
                     Quantity = quantity
-                });
+                };
+                cart.Items.Add(newItem);
+                _db.CartItems.Add(newItem);   // explicitly tell EF to track this as Added
+                itemToTrack = newItem;
             }
+
 
             await _db.SaveChangesAsync();
             return ToDto(cart);

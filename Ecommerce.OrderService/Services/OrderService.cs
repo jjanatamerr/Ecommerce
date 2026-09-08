@@ -13,60 +13,57 @@ public class OrderService : IOrderService
     private readonly OrderDbContext _db;
     private readonly IProductClient _productClient;
     private readonly ILogger<OrderService> _logger;
+    private readonly ICartClient _cartClient;
 
-    public OrderService(OrderDbContext db,IProductClient productClient,ILogger<OrderService> logger)
+    public OrderService(OrderDbContext db,IProductClient productClient,ILogger<OrderService> logger,ICartClient cartClient)
     {
         _db = db;
         _productClient = productClient;
         _logger = logger;
+        _cartClient = cartClient;
     }
 
-    public async Task<OrderResponse> CheckoutAsync( Guid userId,CheckoutRequest request)
+    public async Task<OrderResponse> CheckoutAsync(Guid userId, CheckoutRequest request, string bearerToken)
     {
-
-
-        var existingOrder = await _db.Orders.Include(o => o.Items) .FirstOrDefaultAsync(o => o.IdempotencyKey == request.IdempotencyKey);
+        var existingOrder = await _db.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.IdempotencyKey == request.IdempotencyKey);
 
         if (existingOrder != null)
         {
-
             if (existingOrder.UserId != userId)
-            {
                 throw new InvalidOperationException("This idempotency key has already been used.");
-            }
 
-            _logger.LogInformation("Idempotent checkout request detected. " +"Returning existing order {OrderId} for user {UserId}.",existingOrder.Id, userId);
-
+            _logger.LogInformation("Idempotent checkout request detected. Returning existing order {OrderId} for user {UserId}.", existingOrder.Id, userId);
             return MapToResponse(existingOrder);
         }
 
+        // Fetch the user's actual cart instead of trusting client-supplied items
+        var cart = await _cartClient.GetCartAsync(userId, bearerToken);
+        if (cart is null || cart.Items.Count == 0)
+            throw new InvalidOperationException("Your cart is empty.");
 
         var orderItems = new List<OrderItem>();
 
-        foreach (var item in request.Items)
+        foreach (var cartItem in cart.Items)
         {
-            var product = await _productClient.GetProductAsync(item.ProductId);
+            // Re-validate against Product service for current stock/price at checkout time
+            var product = await _productClient.GetProductAsync(cartItem.ProductId);
+            if (product is null)
+                throw new KeyNotFoundException($"Product with ID '{cartItem.ProductId}' was not found.");
 
-            if (product == null)
-            {
-                throw new KeyNotFoundException($"Product with ID '{item.ProductId}' was not found.");
-            }
+            if (cartItem.Quantity > product.StockQuantity)
+                throw new InvalidOperationException(
+                    $"Insufficient stock for product '{product.Name}'. Available: {product.StockQuantity}, Requested: {cartItem.Quantity}.");
 
-            if (item.Quantity > product.StockQuantity)
-            {
-                throw new InvalidOperationException( $"Insufficient stock for product '{product.Name}'. " +$"Available: {product.StockQuantity}, " + $"Requested: {item.Quantity}.");
-            }
-
-            var orderItem = new OrderItem
+            orderItems.Add(new OrderItem
             {
                 Id = Guid.NewGuid(),
                 ProductId = product.Id,
                 ProductName = product.Name,
-                UnitPriceSnapshot = product.Price,
-                Quantity = item.Quantity
-            };
-
-            orderItems.Add(orderItem);
+                UnitPriceSnapshot = product.Price,   // fresh price at checkout time, not the cart's cached price
+                Quantity = cartItem.Quantity
+            });
         }
 
         var order = new Order
@@ -79,8 +76,7 @@ public class OrderService : IOrderService
             Items = orderItems
         };
 
-        order.TotalAmount = orderItems.Sum(
-            item => item.UnitPriceSnapshot * item.Quantity);
+        order.TotalAmount = orderItems.Sum(item => item.UnitPriceSnapshot * item.Quantity);
 
         _db.Orders.Add(order);
 
@@ -90,53 +86,41 @@ public class OrderService : IOrderService
         }
         catch (DbUpdateException)
         {
-
-            _logger.LogWarning("Possible idempotency race condition detected " +"for key {IdempotencyKey}.", request.IdempotencyKey);
+            _logger.LogWarning("Possible idempotency race condition detected for key {IdempotencyKey}.", request.IdempotencyKey);
 
             var raceOrder = await _db.Orders
                 .AsNoTracking()
                 .Include(o => o.Items)
-                .FirstOrDefaultAsync(o =>
-                    o.IdempotencyKey == request.IdempotencyKey);
+                .FirstOrDefaultAsync(o => o.IdempotencyKey == request.IdempotencyKey);
 
             if (raceOrder != null)
             {
                 if (raceOrder.UserId != userId)
-                {
-                    throw new InvalidOperationException(
-                        "This idempotency key has already been used.");
-                }
-
+                    throw new InvalidOperationException("This idempotency key has already been used.");
                 return MapToResponse(raceOrder);
             }
-
             throw;
         }
 
-
         var paymentSucceeded = SimulatePayment(order.TotalAmount);
-
 
         if (paymentSucceeded)
         {
             order.Status = OrderStatus.Paid;
             order.UpdatedAt = DateTime.UtcNow;
+            _logger.LogInformation("Payment succeeded for order {OrderId}. Order marked as Paid.", order.Id);
 
-            _logger.LogInformation( "Payment succeeded for order {OrderId}. " +"Order marked as Paid.", order.Id);
+            // Clear the cart only after a successful order+payment
+            await _cartClient.ClearCartAsync(userId, bearerToken);
         }
         else
         {
             order.Status = OrderStatus.Failed;
             order.UpdatedAt = DateTime.UtcNow;
-
-            _logger.LogWarning(
-                "Payment failed for order {OrderId}.",
-                order.Id);
+            _logger.LogWarning("Payment failed for order {OrderId}.", order.Id);
         }
 
         await _db.SaveChangesAsync();
-
-
         return MapToResponse(order);
     }
 

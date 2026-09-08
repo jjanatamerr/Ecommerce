@@ -19,38 +19,26 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("checkout")]
-    public async Task<IActionResult> Checkout(
-        [FromBody] CheckoutRequest request)
+    public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request)
     {
         var userId = GetCurrentUserId();
-
         if (userId == null)
-        {
-            return Unauthorized(new
-            {
-                error = "Invalid user identity."
-            });
-        }
+            return Unauthorized(new { error = "Invalid user identity." });
+
+        var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
         try
         {
-            var result = await _orderService.CheckoutAsync( userId.Value,request);
-
+            var result = await _orderService.CheckoutAsync(userId.Value, request, token);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new
-            {
-                error = ex.Message
-            });
+            return NotFound(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            return Conflict(new
-            {
-                error = ex.Message
-            });
+            return Conflict(new { error = ex.Message });
         }
     }
 

@@ -16,6 +16,10 @@ public class CartDbContext : DbContext
         modelBuilder.Entity<Cart>()
             .HasKey(c => c.Id);
 
+        modelBuilder.Entity<Cart>()
+            .HasIndex(c => c.UserId)
+            .IsUnique();   // one Cart per UserId, enforced at the database level
+
         modelBuilder.Entity<CartItem>()
             .HasKey(ci => ci.CartItemId);
 
@@ -28,5 +32,9 @@ public class CartDbContext : DbContext
         modelBuilder.Entity<CartItem>()
             .Property(ci => ci.ProductId)
             .IsRequired();
+
+        modelBuilder.Entity<CartItem>()
+            .Property(ci => ci.UnitPrice)
+            .HasPrecision(18, 2);   // also fixes the decimal precision warning from your logs
     }
 }
