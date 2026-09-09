@@ -7,23 +7,28 @@ import ProductDetails from "./pages/ProductDetails/ProductDetails";
 import Cart from "./pages/Cart/Cart";
 import Checkout from "./pages/Checkout/Checkout";
 import Navbar from "./components/Navbar";
+import ChatbotWidget from "./components/ChatbotWidget";
+import { ChatProvider } from "./store/ChatContext";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      <Navbar />
-      <main className="pb-12">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-        </Routes>
-      </main>
-    </div>
+    <ChatProvider>
+      <div className="min-h-screen bg-gray-50 font-sans">
+        <Navbar />
+        <main className="pb-12">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+          </Routes>
+        </main>
+        <ChatbotWidget />
+      </div>
+    </ChatProvider>
   );
 }
 
