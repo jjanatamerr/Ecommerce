@@ -138,4 +138,31 @@ public class ProductService : IProductService
             ImageUrl = product.ImageUrl
         };
     }
+    public async Task<bool> DecreaseStockAsync(Guid id, int quantity)
+    {
+        var product = await _db.Products
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product == null)
+        {
+            return false;
+        }
+
+        if (product.StockQuantity < quantity)
+        {
+            return false;
+        }
+
+        product.StockQuantity -= quantity;
+
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Stock decreased for product {ProductId}. New stock: {StockQuantity}",
+            product.Id,
+            product.StockQuantity);
+
+        return true;
+    }
+    
 }

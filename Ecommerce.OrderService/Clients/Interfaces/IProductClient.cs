@@ -3,6 +3,7 @@
     public interface IProductClient
     {
         Task<ProductInfo?> GetProductAsync(Guid productId);
+        Task<bool> DecreaseStockAsync(Guid productId, int quantity);
     }
 }
 

@@ -17,15 +17,17 @@ export const Checkout = () => {
     if (!address) return;
 
     setLoading(true);
-    try {
+    try 
+    {
       await orderService.placeOrder(address, paymentMethod);
-    } catch (error) {
-      // Backend unavailable — simulate order success locally
-      console.warn("Backend unavailable, simulating order placement locally.", error);
-    } finally {
-      setLoading(false);
+
       clearCart();
       setOrderSuccess(true);
+    } catch (error) {
+      console.error("Failed to place order:", error);
+      alert("Failed to place order. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -6,7 +6,7 @@ export interface Product {
   description: string;
   price: number;
   imageUrl: string;
-  stockCount: number;
+  stockQuantity: number;
 }
 
 const mockProducts: Product[] = [
@@ -16,7 +16,7 @@ const mockProducts: Product[] = [
     description: "Experience crystal-clear audio with our top-of-the-line wireless headphones featuring active noise cancellation and 30-hour battery life.",
     price: 299.99,
     imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
-    stockCount: 15,
+    stockQuantity: 15,
   },
   {
     id: "2",
@@ -24,7 +24,7 @@ const mockProducts: Product[] = [
     description: "Track your workouts, heart rate, and sleep patterns. Water-resistant up to 50 meters with a built-in GPS.",
     price: 199.50,
     imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
-    stockCount: 8,
+    stockQuantity: 8,
   },
   {
     id: "3",
@@ -32,7 +32,7 @@ const mockProducts: Product[] = [
     description: "Designed for speed and comfort. These shoes feature a breathable mesh upper and responsive cushioning for your daily runs.",
     price: 129.00,
     imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80",
-    stockCount: 42,
+    stockQuantity: 42,
   },
   {
     id: "4",
@@ -40,14 +40,14 @@ const mockProducts: Product[] = [
     description: "A stylish and durable leather backpack perfect for daily commutes or weekend getaways. Fits up to a 15-inch laptop.",
     price: 159.99,
     imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80",
-    stockCount: 0,
+    stockQuantity: 0,
   }
 ];
 
 export const productService = {
   getProducts: async () => {
     try {
-      const response = await api.get<Product[]>("/api/products");
+      const response = await api.get<Product[]>("/api/v1/products");
       return response.data;
     } catch (error) {
       console.warn("Backend unavailable, returning mock products.", error);
@@ -56,7 +56,7 @@ export const productService = {
   },
   getProductById: async (id: string) => {
     try {
-      const response = await api.get<Product>(`/api/products/${id}`);
+      const response = await api.get<Product>(`/api/v1/products/${id}`);
       return response.data;
     } catch (error) {
       console.warn(`Backend unavailable, returning mock product ${id}.`, error);

@@ -12,7 +12,7 @@ namespace Ecommerce.CartService.Migrations
 {
     [DbContext(typeof(CartDbContext))]
     [Migration("20260908193617_InitialCreate")]
-    partial class InitialCreate
+    partial class AddUpdatedAt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

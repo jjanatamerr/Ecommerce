@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/AuthContext";
 import { useCart } from "../store/CartContext";
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 
 const Navbar = () => {
   const { fullName, token, logout } = useAuth();
@@ -11,10 +11,13 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  const handleSearch = (e: FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+
+    if (value.trim()) {
+      navigate(`/products?search=${encodeURIComponent(value.trim())}`);
+    } else {
+      navigate("/products");
     }
   };
 
@@ -25,18 +28,18 @@ const Navbar = () => {
           ShopEase
         </Link>
 
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl">
+        <div className="hidden md:flex flex-1 max-w-xl">
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search for products..."
             className="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
           />
-          <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white px-4 rounded-r-lg transition-colors">
+          <button type="button" className="bg-orange-500 hover:bg-orange-600 text-white px-4 rounded-r-lg transition-colors">
             🔍
           </button>
-        </form>
+        </div>
 
         <div className="flex items-center gap-5">
           <Link

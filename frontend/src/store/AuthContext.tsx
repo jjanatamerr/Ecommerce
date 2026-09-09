@@ -5,6 +5,7 @@ interface AuthContextType {
   token: string | null;
   fullName: string | null;
   role: string | null;
+  isAuthenticated: boolean;
   setAuth: (token: string, fullName: string, role: string) => void;
   logout: () => void;
 }
@@ -15,7 +16,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
   const [fullName, setFullName] = useState<string | null>(localStorage.getItem("fullName"));
   const [role, setRole] = useState<string | null>(localStorage.getItem("role"));
-
+  const isAuthenticated = !!token;
   const setAuth = (newToken: string, newFullName: string, newRole: string) => {
     localStorage.setItem("token", newToken);
     localStorage.setItem("fullName", newFullName);
@@ -35,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, fullName, role, setAuth, logout }}>
+    <AuthContext.Provider value={{ token, fullName, role, isAuthenticated, setAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );

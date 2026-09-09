@@ -7,22 +7,44 @@ namespace Ecommerce.OrderService.Services
     public class CartClient : ICartClient
     {
         private readonly HttpClient _httpClient;
-        public CartClient(HttpClient httpClient) => _httpClient = httpClient;
 
-        public async Task<CartDto?> GetCartAsync(Guid userId, string bearerToken)
+        public CartClient(HttpClient httpClient)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "/api/cart");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            _httpClient = httpClient;
+        }
+
+        public async Task<CartDto?> GetCartAsync(
+            Guid userId,
+            string bearerToken)
+        {
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "/api/v1/cart"
+            );
+
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", bearerToken);
 
             var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode) return null;
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
             return await response.Content.ReadFromJsonAsync<CartDto>();
         }
 
-        public async Task ClearCartAsync(Guid userId, string bearerToken)
+        public async Task ClearCartAsync(
+            Guid userId,
+            string bearerToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete, "/api/cart");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            var request = new HttpRequestMessage(
+                HttpMethod.Delete,
+                "/api/v1/cart"
+            );
+
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", bearerToken);
+
             await _httpClient.SendAsync(request);
         }
     }

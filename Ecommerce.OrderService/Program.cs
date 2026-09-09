@@ -19,10 +19,17 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 {
     options.UseSqlServer( builder.Configuration.GetConnectionString( "DefaultConnection"));
 });
-builder.Services.AddHttpClient<ICartClient, CartClient>(client =>
-{
-    client.BaseAddress = new Uri("https://localhost:5003/"); // CartService's actual port
-});
+builder.Services
+    .AddHttpClient<ICartClient, CartClient>(client =>
+    {
+        client.BaseAddress = new Uri("https://localhost:5003/");
+    })
+    .ConfigurePrimaryHttpMessageHandler(() =>
+        new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
 
 
 builder.Services.AddScoped<IOrderService, OrderService>();
@@ -30,10 +37,17 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 
 
-builder.Services.AddHttpClient<IProductClient, ProductClient>(client =>
-{
-    client.BaseAddress = new Uri("https://localhost:5002/");
-});
+builder.Services
+    .AddHttpClient<IProductClient, ProductClient>(client =>
+    {
+        client.BaseAddress = new Uri("https://localhost:5002/");
+    })
+    .ConfigurePrimaryHttpMessageHandler(() =>
+        new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        });
 
 
 var jwtSection = builder.Configuration.GetSection("Jwt");

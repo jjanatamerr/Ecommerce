@@ -17,4 +17,5 @@ public interface IProductService
         UpdateProductRequest request);
 
     Task<bool> DeleteAsync(Guid id);
+    Task<bool> DecreaseStockAsync(Guid id, int quantity);
 }

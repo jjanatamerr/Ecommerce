@@ -62,8 +62,8 @@ export const ProductDetails = () => {
           <p className="text-gray-600 mb-8 leading-relaxed">{product.description}</p>
           
           <div className="mb-8">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${product.stockCount > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {product.stockCount > 0 ? `In Stock (${product.stockCount})` : 'Out of Stock'}
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${product.stockQuantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {product.stockQuantity > 0 ? `In Stock (${product.stockQuantity})` : 'Out of Stock'}
             </span>
           </div>
 
@@ -71,7 +71,7 @@ export const ProductDetails = () => {
             size="lg"
             onClick={handleAddToCart}
             isLoading={adding}
-            disabled={product.stockCount === 0}
+            disabled={product.stockQuantity === 0}
             className="w-full md:w-auto self-start"
           >
             Add to Cart

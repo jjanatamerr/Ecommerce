@@ -14,21 +14,79 @@ export interface Cart {
   totalPrice: number;
 }
 
+interface BackendCartItem {
+  cartItemId: string;
+  productId: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+}
+
+interface BackendCart {
+  id: string;
+  userId: string;
+  items: BackendCartItem[];
+  total: number;
+  createdAt: string;
+}
+
+const mapCart = (data: BackendCart): Cart => ({
+  id: data.id,
+  totalPrice: data.total,
+  items: data.items.map((item) => ({
+    id: item.cartItemId,
+    productId: item.productId,
+    quantity: item.quantity,
+    product: {
+      id: item.productId,
+      name: item.productName,
+      description: "",
+      price: item.unitPrice,
+      imageUrl: "",
+      stockQuantity: 0,
+    },
+  })),
+});
+
 export const cartService = {
-  getCart: async () => {
-    const response = await api.get<Cart>("/api/cart");
-    return response.data;
+  getCart: async (): Promise<Cart> => {
+    const response = await api.get<BackendCart>("/api/v1/cart");
+    return mapCart(response.data);
   },
-  addToCart: async (productId: string, quantity: number) => {
-    const response = await api.post<Cart>("/api/cart/items", { productId, quantity });
-    return response.data;
+
+  addToCart: async (
+    productId: string,
+    quantity: number
+  ): Promise<Cart> => {
+    const response = await api.post<BackendCart>("/api/v1/cart/items", {
+      productId,
+      quantity,
+    });
+
+    return mapCart(response.data);
   },
-  updateCartItem: async (cartItemId: string, quantity: number) => {
-    const response = await api.put<Cart>(`/api/cart/items/${cartItemId}`, { quantity });
-    return response.data;
+
+  updateCartItem: async (
+    cartItemId: string,
+    quantity: number
+  ): Promise<Cart> => {
+    const response = await api.put<BackendCart>(
+      `/api/v1/cart/items/${cartItemId}`,
+      {
+        quantity,
+      }
+    );
+
+    return mapCart(response.data);
   },
-  removeFromCart: async (cartItemId: string) => {
-    const response = await api.delete<Cart>(`/api/cart/items/${cartItemId}`);
-    return response.data;
+
+  removeFromCart: async (
+    cartItemId: string
+  ): Promise<Cart> => {
+    const response = await api.delete<BackendCart>(
+      `/api/v1/cart/items/${cartItemId}`
+    );
+
+    return mapCart(response.data);
   },
 };

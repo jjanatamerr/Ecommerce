@@ -66,6 +66,21 @@ public class ProductsController : ControllerBase
 
         return Ok(product);
     }
+    [HttpPut("{id:guid}/decrease-stock")]
+    public async Task<IActionResult> DecreaseStock(
+        Guid id,
+        [FromBody] int quantity)
+    {
+        var success = await _productService.DecreaseStockAsync(id, quantity);
+
+        if (!success)
+        {
+            return BadRequest("Product not found or insufficient stock.");
+        }
+
+        return Ok();
+    }
+
 
 
     [HttpDelete("{id:guid}")]
