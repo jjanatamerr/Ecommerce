@@ -1,20 +1,17 @@
 import { Link } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import ProductCard from "../../components/ProductCard";
 import type { Product } from "../../components/ProductCard";
 
 const mockProducts: Product[] = [
-  { id: "1", name: "Wireless Headphones", price: 49.99 },
-  { id: "2", name: "Smart Watch", price: 89.5 },
-  { id: "3", name: "Running Shoes", price: 35.0 },
-  { id: "4", name: "Backpack", price: 25.99 },
+  { id: "1", name: "Premium Wireless Headphones", price: 299.99, imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80" },
+  { id: "2", name: "Smart Fitness Watch", price: 199.50, imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" },
+  { id: "3", name: "Ultra-Light Running Shoes", price: 129.00, imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80" },
+  { id: "4", name: "Minimalist Leather Backpack", price: 159.99, imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80" },
 ];
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <div className="bg-gray-50">
       <div className="bg-gradient-to-r from-orange-50 to-orange-100">
         <div className="max-w-7xl mx-auto px-6 py-20 text-center">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">

@@ -1,8 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/AuthContext";
+import { useCart } from "../store/CartContext";
+import { useState, FormEvent } from "react";
 
 const Navbar = () => {
   const { fullName, token, logout } = useAuth();
+  const { cart } = useCart();
+  const cartItemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-20">
@@ -11,16 +25,18 @@ const Navbar = () => {
           ShopEase
         </Link>
 
-        <div className="hidden md:flex flex-1 max-w-xl">
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl">
           <input
             type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search for products..."
             className="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
           />
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 rounded-r-lg transition-colors">
+          <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white px-4 rounded-r-lg transition-colors">
             🔍
           </button>
-        </div>
+        </form>
 
         <div className="flex items-center gap-5">
           <Link
@@ -28,9 +44,11 @@ const Navbar = () => {
             className="relative text-gray-700 hover:text-orange-500 transition-colors"
           >
             🛒
-            <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              0
-            </span>
+            {cartItemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                {cartItemCount}
+              </span>
+            )}
           </Link>
 
           {token ? (

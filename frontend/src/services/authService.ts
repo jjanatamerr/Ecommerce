@@ -1,4 +1,3 @@
-
 import api from "./api";
 
 export interface LoginPayload {
@@ -21,29 +20,12 @@ export interface AuthResponse {
   expiresAt: string;
 }
 
-export const login = async (
-  payload: LoginPayload
-): Promise<AuthResponse> => {
-  const res = await api.post<AuthResponse>(
-    "/api/v1/auth/login",
-    payload
-  );
-
-  localStorage.setItem("token", res.data.token);
-
+export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
+  const res = await api.post<AuthResponse>("/api/v1/auth/login", payload);
   return res.data;
 };
 
-export const register = async (
-  payload: RegisterPayload
-): Promise<AuthResponse> => {
-  const res = await api.post<AuthResponse>(
-    "/api/v1/auth/register",
-    payload
-  );
-
-  localStorage.setItem("token", res.data.token);
-
+export const register = async (payload: RegisterPayload): Promise<AuthResponse> => {
+  const res = await api.post<AuthResponse>("/api/v1/auth/register", payload);
   return res.data;
 };
-
